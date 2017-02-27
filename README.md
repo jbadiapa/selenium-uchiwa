@@ -1,6 +1,6 @@
 # selenium-uchiwa
 
-This is dsfaa selenium unit test to check uchiwa
+This is a selenium unit test to check uchiwa
 
 To set up the selenium environment you can take a look at https://gist.github.com/jbadiapa/921c7719c59bfd89cf862fd6bef07d6d
 
