@@ -1,7 +1,8 @@
+from browser import Browser
 import unittest
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from time import sleep
+# from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+# from time import sleep
 
 
 class UchiwaSelenium(unittest.TestCase):
@@ -14,102 +15,71 @@ class UchiwaSelenium(unittest.TestCase):
     AGGREGATES = '#/aggregates'
     DATACENTERS = '#/datacenters'
 
-    def _generate_url(self):
-        self.url_events = '{url}{rest}'.format(
-            url=self.url,
-            rest=self.EVENTS
-        )
-        self.url_clients = '{url}{rest}'.format(
-            url=self.url,
-            rest=self.CLIENTS
-        )
-        self.url_checks = '{url}{rest}'.format(
-            url=self.url,
-            rest=self.CHECKS
-        )
-        self.url_silenced = '{url}{rest}'.format(
-            url=self.url,
-            rest=self.SILENCED
-        )
-        self.url_stashes = '{url}{rest}'.format(
-            url=self.url,
-            rest=self.STASHES
-        )
-        self.url_aggregates = '{url}{rest}'.format(
-            url=self.url,
-            rest=self.AGGREGATES
-        )
-        self.url_datacenters = '{url}{rest}'.format(
-            url=self.url,
-            rest=self.DATACENTERS
-        )
-
     def setUp(self):
-        profile = webdriver.FirefoxProfile()
-        profile.set_preference('network.http.phishy-userpass-length', 255)
-        self.driver = webdriver.Firefox(firefox_profile=profile)
-        self.username = 'operator'
-        self.password = 'changeme'
-        self.ip = '192.168.1.64'
-        self.url = 'https://{user}:{passw}@{ip}/uchiwa/'.format(
-            user=self.username,
-            passw=self.password,
-            ip=self.ip
-        )
-        self._generate_url()
+        browser.start()
 
     def _url_load(self, url):
-        driver = self.driver
-        driver.get(url)
-        sleep(2)
-        return driver
+        browser.load_page_site(url)
+        return browser.driver
 
     def _url_test(self, url, text):
         driver = self._url_load(url)
         assert text in driver.title
 
     def test_uchiwa_login(self):
-        self._url_test(self.url, 'Events | Uchiwa')
+        self._url_load(UchiwaSelenium.EVENTS)
+        browser.wait_for_obj(EC.title_is('Events | Uchiwa'))
 
     def test_uchiwa_events(self):
-        self._url_test(self.url_events, 'Events | Uchiwa')
+        self._url_load(UchiwaSelenium.EVENTS)
+        browser.wait_for_obj(EC.title_is('Events | Uchiwa'))
 
     def test_uchiwa_clients(self):
-        self._url_test(self.url_clients, 'Clients | Uchiwa')
+        self._url_load(UchiwaSelenium.CLIENTS)
+        browser.wait_for_obj(EC.title_is('Clients | Uchiwa'))
 
     def test_uchiwa_checks(self):
-        self._url_test(self.url_checks, 'Checks | Uchiwa')
+        self._url_load(UchiwaSelenium.CHECKS)
+        browser.wait_for_obj(EC.title_is('Checks | Uchiwa'))
 
     def test_uchiwa_silenced(self):
-        self._url_test(self.url_silenced, 'Silenced | Uchiwa')
+        self._url_load(UchiwaSelenium.SILENCED)
+        browser.wait_for_obj(EC.title_is('Silenced | Uchiwa'))
 
     def test_uchiwa_stashes(self):
-        self._url_test(self.url_stashes, 'Stashes | Uchiwa')
+        self._url_load(UchiwaSelenium.STASHES)
+        browser.wait_for_obj(EC.title_is('Stashes | Uchiwa'))
 
     def test_uchiwa_aggregates(self):
-        self._url_test(self.url_aggregates, 'Aggregates | Uchiwa')
+        self._url_load(UchiwaSelenium.AGGREGATES)
+        browser.wait_for_obj(EC.title_is('Aggregates | Uchiwa'))
 
     def test_uchiwa_datacenters(self):
-        self._url_test(self.url_datacenters, 'Datacenters | Uchiwa')
-
+        self._url_load(UchiwaSelenium.DATACENTERS)
+        browser.wait_for_obj(EC.title_is('Datacenters | Uchiwa'))
+    '''
     def _uchiwa_search(self, text, items):
-        driver = self._url_load(self.url_clients)
-        self.assertIn("Clients", driver.title)
-        elem = driver.find_element(By.XPATH,
-                                   '//input[@ng-model=\'filters.q\']')
-        elem.send_keys(text)
+        self._url_load(UchiwaSelenium.CLIENTS)
+        browser.wait_for_obj(EC.title_is('Clients | Uchiwa'))
         sleep(1)
-        search = driver.find_element_by_class_name('search-results')
+        inputtext = browser.wait_for_obj(EC.visibility_of_element_located(
+            (By.XPATH, '//input[@ng-model=\'filters.q\']')
+        ))
+        inputtext.send_keys(text)
+        search = browser.wait_for_obj(EC.presence_of_element_located(
+            (By.CLASS_NAME, 'search-results')
+        ))
         assert items in search.text
 
     def test_uchiwa_1_localhost(self):
         self._uchiwa_search('localhost', '1 Items')
-
-    def test_uchiwa_3_overcloud(self):
-        self._uchiwa_search('overcloud', '3 Items')
-
+    '''
     def tearDown(self):
-        self.driver.close()
+        browser.end()
+
 
 if __name__ == "__main__":
+    browser = Browser(screenshot_on_error=True)
+    browser.parse_arguments()
+    browser.set_url('uchiwa')
     unittest.main()
